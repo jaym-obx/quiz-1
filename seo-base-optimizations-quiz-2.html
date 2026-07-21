@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEO Base Optimizations Process Quiz | OuterBox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --dark-blue:#17212E;
+    --obx-blue:#1D4E89;
+    --frost:#EEF3F6;
+    --white:#FFFFFF;
+    --orange:#C75300;
+    --gold:#FFB703;
+    --slate:#5C6C80;
+    --green:#1E7A3D;
+    --green-bg:#E7F5EC;
+    --red:#C0392B;
+    --red-bg:#FBEAE8;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    font-family:"Roboto",Helvetica,Arial,"Open Sans",sans-serif;
+    color:var(--dark-blue);
+    background:var(--frost);
+    line-height:1.15;
+    font-size:16px;
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:0 20px 64px;}
+
+  /* Header */
+  header{background:var(--dark-blue);color:var(--white);padding:40px 0 36px;}
+  .header-inner{max-width:820px;margin:0 auto;padding:0 20px;}
+  .wordmark{font-weight:900;font-size:26px;letter-spacing:-0.5px;color:var(--white);margin:0 0 18px;}
+  .wordmark span{color:var(--gold);}
+  header h1{font-weight:900;font-size:30px;margin:0 0 8px;line-height:1.15;color:var(--white);}
+  header .subtitle{font-weight:400;font-size:15px;color:var(--gold);margin:0;}
+
+  /* Cards */
+  .card{background:var(--white);border:1px solid #dfe7ed;border-radius:8px;padding:24px 26px;margin-top:20px;}
+
+  /* Intake */
+  .intake{margin-top:-20px;position:relative;top:30px;}
+  .intake .row{display:flex;flex-wrap:wrap;gap:20px;}
+  .field{flex:1 1 220px;}
+  .field label{display:block;font-weight:700;font-size:14px;margin-bottom:8px;color:var(--dark-blue);}
+  .field input{width:100%;padding:11px 13px;border:1px solid #b9c5d0;border-radius:6px;font-family:inherit;font-size:15px;color:var(--dark-blue);background:var(--white);}
+  .field input:focus{outline:none;border-color:var(--obx-blue);box-shadow:0 0 0 3px rgba(29,78,137,0.18);}
+
+  .lead{margin:40px 0 0;font-size:14px;color:var(--slate);}
+
+  /* Questions */
+  .q-number{display:inline-block;font-weight:900;font-size:13px;color:var(--orange);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;}
+  .q-text{font-weight:700;font-size:17px;margin:0 0 18px;line-height:1.3;}
+  .options{list-style:none;margin:0;padding:0;}
+  .options li{margin:0 0 10px;}
+  .opt{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid #cdd8e1;border-radius:6px;cursor:pointer;transition:border-color .12s ease, background .12s ease;}
+  .opt:hover{border-color:var(--obx-blue);background:var(--frost);}
+  .opt input[type="radio"]{appearance:none;-webkit-appearance:none;width:18px;height:18px;margin:2px 0 0;flex:0 0 18px;border:2px solid var(--slate);border-radius:50%;cursor:pointer;position:relative;}
+  .opt input[type="radio"]:checked{border-color:var(--orange);}
+  .opt input[type="radio"]:checked::after{content:"";position:absolute;top:3px;left:3px;width:8px;height:8px;border-radius:50%;background:var(--orange);}
+  .opt input[type="radio"]:focus-visible{outline:2px solid var(--obx-blue);outline-offset:2px;}
+  .opt-text{font-size:15px;line-height:1.35;}
+  .opt:has(input:checked){border-color:var(--orange);background:#fff7f1;}
+
+  /* Graded states */
+  .opt.correct{border-color:var(--green);background:var(--green-bg);}
+  .opt.correct .opt-text{color:#155d2e;font-weight:700;}
+  .opt.incorrect{border-color:var(--red);background:var(--red-bg);}
+  .opt.incorrect .opt-text{color:#9c2419;font-weight:700;}
+  .opt.correct input[type="radio"]{border-color:var(--green);}
+  .opt.incorrect input[type="radio"]{border-color:var(--red);}
+  .badge{margin-left:auto;align-self:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:4px;white-space:nowrap;color:#fff;}
+  .opt.correct .badge{background:var(--green);}
+  .opt.incorrect .badge{background:var(--red);}
+  .graded .opt{cursor:default;}
+  .graded .opt:hover{background:inherit;border-color:inherit;}
+
+  /* Submit */
+  .submit-row{margin-top:30px;text-align:center;}
+  button.submit{background:var(--orange);color:var(--white);font-family:inherit;font-weight:700;font-size:17px;letter-spacing:0.5px;border:none;border-radius:6px;padding:16px 54px;cursor:pointer;transition:background .12s ease;}
+  button.submit:hover{background:#a84600;}
+  button.submit:focus-visible{outline:3px solid var(--obx-blue);outline-offset:3px;}
+  button.submit:disabled{background:var(--slate);cursor:default;}
+
+  .note{font-size:13px;color:var(--slate);text-align:center;margin:16px auto 0;max-width:560px;line-height:1.45;}
+  .warn{display:none;background:#fff7f1;border:1px solid var(--orange);color:var(--orange);border-radius:6px;padding:12px 16px;margin-top:18px;font-size:14px;font-weight:500;}
+
+  footer{text-align:center;color:var(--slate);font-size:12px;margin-top:36px;}
+
+  /* Popover */
+  .overlay{position:fixed;inset:0;background:rgba(23,33,46,0.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
+  .overlay.show{display:flex;}
+  .modal{background:var(--white);border-radius:10px;max-width:430px;width:100%;padding:34px 30px 28px;text-align:center;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+  .modal .close{position:absolute;top:10px;right:14px;border:none;background:none;font-size:26px;line-height:1;color:var(--slate);cursor:pointer;padding:0;}
+  .modal .close:hover{color:var(--dark-blue);}
+  .modal .check{width:54px;height:54px;border-radius:50%;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;margin:0 auto 14px;}
+  .modal h2{color:var(--obx-blue);font-size:21px;margin:0 0 10px;font-weight:900;}
+  .modal p{color:var(--dark-blue);font-size:15px;margin:0 0 6px;line-height:1.45;}
+  .modal .score{color:var(--slate);font-size:14px;margin:6px 0 20px;}
+  .modal .ok{background:var(--obx-blue);color:#fff;border:none;border-radius:6px;padding:12px 34px;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer;}
+  .modal .ok:hover{background:#163c69;}
+
+  @media (max-width:560px){
+    header h1{font-size:24px;}
+    .card{padding:20px 18px;}
+    .badge{margin-left:0;margin-top:6px;}
+    .opt{flex-wrap:wrap;}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <p class="wordmark">Outer<span>Box</span></p>
+    <h1>SEO Base Optimizations &amp; Title Tag Process Quiz</h1>
+    <p class="subtitle">Knowledge check &middot; SEO Strategist / Specialist process</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="card intake">
+    <div class="row">
+      <div class="field">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" placeholder="Your full name" autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="date">Date</label>
+        <input type="date" id="date" name="date">
+      </div>
+    </div>
+  </div>
+
+  <p class="lead">Choose the best answer for each of the 20 questions, then press <strong>Submit results</strong> at the bottom.</p>
+
+  <form id="quizForm">
+    <div id="questions"></div>
+
+    <div class="warn" id="warnBox"></div>
+
+    <div class="submit-row">
+      <button type="button" class="submit" id="submitBtn">Submit results</button>
+    </div>
+    <p class="note">Submitting opens a new Gmail tab with a message to <strong>jaym@outerbox.com</strong> already filled in with your name, date, and answers. Review it and hit send to deliver your results.</p>
+  </form>
+
+  <footer>OuterBox &mdash; Internal SEO training</footer>
+</div>
+
+<!-- Thank-you popover -->
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <button type="button" class="close" id="closeModal" aria-label="Close">&times;</button>
+    <div class="check">&#10003;</div>
+    <h2 id="modalTitle">Thank you, your answers have been submitted</h2>
+    <p>Your responses are now highlighted below &mdash; correct answers in green, incorrect in red.</p>
+    <p class="score" id="scoreLine"></p>
+    <button type="button" class="ok" id="okBtn">Review my answers</button>
+  </div>
+</div>
+
+<script>
+  // ---- Quiz content: every answer is a full descriptive phrase; no column-letter answers ----
+  // correct = index of the right option
+  const QUIZ = [
+    { q: "Which of these is a recommended tool or plugin for the optimization process?",
+      a: ["The Yoast SEO plugin", "The Detailed plugin", "The Moz Bar toolbar", "The Screaming Frog crawler"], correct: 1 },
+
+    { q: "Which recommended tool is used specifically for checking the length of meta elements?",
+      a: ["A tool called the Meta Length Checker", "A tool called SERP Preview Plus", "A tool called the Pixel Width Tool", "A tool called Character Counter Pro"], correct: 0 },
+
+    { q: "What is the first step when setting up your Base Optimizations sheet?",
+      a: ["List the URLs you plan to optimize", "Navigate to your client's Google Drive folder", "Add the current title tags for each page", "Begin your keyword research"], correct: 1 },
+
+    { q: "To create the sheet from a template, which path do you follow?",
+      a: ["Open File, then New, then Blank Sheet", "Use Insert, then Template, then Apply", "Click +New, then Google Sheets, then From a Template, then Create and Share", "Use Tools, then Templates, then Import"], correct: 2 },
+
+    { q: "Which template do you choose from the Template Library?",
+      a: ["The Base Optimizations - Client Name - Q# YYYY template", "The SEO Audit - Client Name template", "The Keyword Research - YYYY template", "The Meta Optimization template"], correct: 0 },
+
+    { q: "Under which category is the Base Optimizations template found?",
+      a: ["Under the Content Templates category", "Under the Client Reporting Templates category", "Under the Link Building Templates category", "Under the SEO Strategist/Specialist Templates category"], correct: 3 },
+
+    { q: "When renaming the sheet, what should replace \"Client Name\"?",
+      a: ["The internal project ID number", "Your client's actual name", "The name of your agency", "Today's calendar date"], correct: 1 },
+
+    { q: "What should \"Q# YYYY\" in the sheet title be replaced with?",
+      a: ["The campaign number for the project", "The total number of URLs you are optimizing", "The current quarter and year", "The client's fiscal year end"], correct: 2 },
+
+    { q: "Where do you list the URLs you plan to optimize?",
+      a: ["In the current URL column of the sheet", "In the H1 field for each page", "In the meta description field for each page", "In a separate keyword research document"], correct: 0 },
+
+    { q: "After listing your URLs, which current on-page elements should you record for each one?",
+      a: ["Only the current title tag", "The current title tag, meta description, and H1", "Only the current meta description and word count", "The current bounce rate and internal links"], correct: 1 },
+
+    { q: "Before writing the new title tags and metas, what should you identify for each page?",
+      a: ["The page's current bounce rate", "The primary and secondary keywords you aim to target", "The number of backlinks the page has", "The page's load speed score"], correct: 1 },
+
+    { q: "Which keyword does the H1 format call for?",
+      a: ["The lowest-volume keyword you can find", "The brand name on its own", "The primary keyword, meaning the second highest-volume or most valuable supporting keyword", "A full call-to-action phrase"], correct: 2 },
+
+    { q: "What is the recommended character range for a title tag?",
+      a: ["Between 30 and 60 characters", "Between 50 and 90 characters", "Between 70 and 120 characters", "Between 100 and 150 characters"], correct: 1 },
+
+    { q: "What is the recommended character range for a meta description?",
+      a: ["Between 50 and 90 characters", "Between 100 and 250 characters", "Between 150 and 300 characters", "Between 250 and 400 characters"], correct: 1 },
+
+    { q: "In the title tag format, where should the brand name be placed?",
+      a: ["At the very beginning of the title", "In the middle of the title", "Towards the end, unless placing it earlier is necessary", "It should be left out of the title entirely"], correct: 2 },
+
+    { q: "According to the keyword targeting tips, which keyword should be placed first in a title tag?",
+      a: ["The most important keyword", "The brand name", "The lowest-volume keyword", "A call to action"], correct: 0 },
+
+    { q: "What should you use instead of the word \"and\" to save characters in a title tag?",
+      a: ["A plus sign in place of the word", "A comma in place of the word", "An ampersand in place of the word", "A forward slash in place of the word"], correct: 2 },
+
+    { q: "What does the guidance say about title tag length?",
+      a: ["Titles must always stay under 60 characters", "Longer titles with more keywords tend to perform better", "Titles must fit within a specific pixel width", "Shorter titles are always the better choice"], correct: 1 },
+
+    { q: "Which of the following is an example of keyword stuffing to avoid?",
+      a: ["A title formatted as keyword, CTA, secondary keyword, then brand", "A title that simply repeats the same keyword separated by dashes again and again", "A title written as primary keyword at brand name", "A title that uses a number such as 500+ products before the brand"], correct: 1 },
+
+    { q: "To avoid duplicate content issues, what should you ensure about page titles?",
+      a: ["That every title leads with the brand name", "That all titles are exactly the same length", "That each title matches its page H1 word for word", "That no two pages share an identical title"], correct: 3 }
+  ];
+
+  // ---- Render questions ----
+  const container = document.getElementById("questions");
+  QUIZ.forEach((item, i) => {
+    const n = i + 1;
+    const card = document.createElement("div");
+    card.className = "card";
+    let opts = "";
+    item.a.forEach((ans, j) => {
+      const id = "q" + n + "_o" + j;
+      const safe = ans.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+      opts += '<li><label class="opt" for="' + id + '">' +
+                '<input type="radio" id="' + id + '" name="q' + n + '" data-idx="' + j + '" value="' + safe + '">' +
+                '<span class="opt-text">' + safe + '</span>' +
+              '</label></li>';
+    });
+    card.innerHTML =
+      '<span class="q-number">Question ' + n + ' of ' + QUIZ.length + '</span>' +
+      '<p class="q-text">' + item.q.replace(/&/g, "&amp;").replace(/</g, "&lt;") + '</p>' +
+      '<ul class="options">' + opts + '</ul>';
+    container.appendChild(card);
+  });
+
+  // ---- Helpers ----
+  const overlay = document.getElementById("overlay");
+  const submitBtn = document.getElementById("submitBtn");
+  let submitted = false;
+
+  function addBadge(label, text) {
+    const b = document.createElement("span");
+    b.className = "badge";
+    b.textContent = text;
+    label.appendChild(b);
+  }
+
+  function gradeAndHighlight() {
+    let score = 0;
+    QUIZ.forEach((item, i) => {
+      const n = i + 1;
+      const sel = document.querySelector('input[name="q' + n + '"]:checked');
+      const radios = document.querySelectorAll('input[name="q' + n + '"]');
+      radios.forEach((r) => {
+        const idx = parseInt(r.dataset.idx, 10);
+        const label = r.closest(".opt");
+        if (idx === item.correct) {
+          label.classList.add("correct");
+          addBadge(label, "Correct answer");
+        } else if (sel && r === sel) {
+          label.classList.add("incorrect");
+          addBadge(label, "Your answer");
+        }
+        r.disabled = true;
+      });
+      if (sel && parseInt(sel.dataset.idx, 10) === item.correct) score++;
+    });
+    document.getElementById("questions").classList.add("graded");
+    return score;
+  }
+
+  function openModal(score) {
+    document.getElementById("scoreLine").textContent =
+      "Score: " + score + " out of " + QUIZ.length + " correct.";
+    overlay.classList.add("show");
+    document.getElementById("okBtn").focus();
+  }
+  function closeModal() {
+    overlay.classList.remove("show");
+    document.getElementById("questions").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  document.getElementById("closeModal").addEventListener("click", closeModal);
+  document.getElementById("okBtn").addEventListener("click", closeModal);
+  overlay.addEventListener("click", function (e) { if (e.target === overlay) closeModal(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && overlay.classList.contains("show")) closeModal(); });
+
+  // ---- Submit ----
+  submitBtn.addEventListener("click", function () {
+    if (submitted) return;
+
+    const name = document.getElementById("name").value.trim();
+    const date = document.getElementById("date").value.trim();
+    const warnBox = document.getElementById("warnBox");
+
+    const unanswered = [];
+    QUIZ.forEach((item, i) => {
+      const n = i + 1;
+      if (!document.querySelector('input[name="q' + n + '"]:checked')) unanswered.push(n);
+    });
+
+    const problems = [];
+    if (!name) problems.push("your name");
+    if (!date) problems.push("the date");
+    if (unanswered.length) problems.push("question" + (unanswered.length > 1 ? "s " : " ") + unanswered.join(", "));
+
+    if (problems.length) {
+      warnBox.style.display = "block";
+      warnBox.textContent = "Please complete " + problems.join("; ") + " before submitting.";
+      warnBox.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (!name) document.getElementById("name").focus();
+      return;
+    }
+    warnBox.style.display = "none";
+
+    // Build the email body before disabling inputs
+    const lines = [];
+    QUIZ.forEach((item, i) => {
+      const n = i + 1;
+      const sel = document.querySelector('input[name="q' + n + '"]:checked');
+      const answer = sel ? sel.value.replace(/&quot;/g, '"').replace(/&amp;/g, "&") : "(no answer)";
+      const isCorrect = sel && parseInt(sel.dataset.idx, 10) === item.correct;
+      lines.push("Q" + n + ". " + item.q +
+                 "\n   Answer given: " + answer +
+                 "\n   Result: " + (isCorrect ? "Correct" : "Incorrect"));
+    });
+
+    const score = gradeAndHighlight();
+
+    const subject = "SEO Base Optimizations Quiz Results - " + name + " - " + date + " (" + score + "/" + QUIZ.length + ")";
+    const body =
+      "SEO Base Optimizations Process Quiz - Results\n" +
+      "=============================================\n\n" +
+      "Name: " + name + "\n" +
+      "Date: " + date + "\n" +
+      "Score: " + score + " of " + QUIZ.length + " correct\n\n" +
+      "ANSWERS\n-------\n" +
+      lines.join("\n\n") + "\n";
+
+    // Open a pre-filled Gmail compose window in a new tab (users are logged into Chrome/Gmail).
+    // Opening in a new tab keeps the highlighting and popover visible on this page.
+    const gmailUrl = "https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1" +
+      "&to=jaym@outerbox.com" +
+      "&su=" + encodeURIComponent(subject) +
+      "&body=" + encodeURIComponent(body);
+    const win = window.open(gmailUrl, "_blank");
+
+    // Fallback: if the new tab was popup-blocked, open the default mail handler
+    // via a hidden link click (does not navigate this page away).
+    if (!win) {
+      const a = document.createElement("a");
+      a.href = "mailto:jaym@outerbox.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    submitted = true;
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitted";
+
+    openModal(score);
+  });
+</script>
+
+</body>
+</html>
