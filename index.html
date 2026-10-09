@@ -52,6 +52,9 @@
   .field input{width:100%;padding:11px 13px;border:1px solid #b9c5d0;border-radius:6px;font-family:inherit;font-size:15px;color:var(--dark-blue);background:var(--white);}
   .field input:focus{outline:none;border-color:var(--obx-blue);box-shadow:0 0 0 3px rgba(29,78,137,0.18);}
 
+  /* Honeypot field: hidden from people, visible to bots */
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+
   .lead{margin:40px 0 0;font-size:14px;color:var(--slate);}
 
   /* Questions */
@@ -100,11 +103,14 @@
   .modal .close{position:absolute;top:10px;right:14px;border:none;background:none;font-size:26px;line-height:1;color:var(--slate);cursor:pointer;padding:0;}
   .modal .close:hover{color:var(--dark-blue);}
   .modal .check{width:54px;height:54px;border-radius:50%;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;margin:0 auto 14px;}
+  .modal .check.fail{background:var(--red-bg);color:var(--red);}
   .modal h2{color:var(--obx-blue);font-size:21px;margin:0 0 10px;font-weight:900;}
   .modal p{color:var(--dark-blue);font-size:15px;margin:0 0 6px;line-height:1.45;}
   .modal .score{color:var(--slate);font-size:14px;margin:6px 0 20px;}
   .modal .ok{background:var(--obx-blue);color:#fff;border:none;border-radius:6px;padding:12px 34px;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer;}
   .modal .ok:hover{background:#163c69;}
+  .modal .alt{display:none;margin-top:12px;background:none;border:1px solid var(--obx-blue);color:var(--obx-blue);border-radius:6px;padding:10px 24px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;}
+  .modal .alt.show{display:inline-block;}
 
   @media (max-width:560px){
     header h1{font-size:24px;}
@@ -138,11 +144,15 @@
         <input type="date" id="date" name="date">
       </div>
     </div>
+    <div class="hp" aria-hidden="true">
+      <label for="website">Website</label>
+      <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+    </div>
   </div>
 
   <p class="lead">Choose the best answer for each of the 20 questions, then press <strong>Submit results</strong> at the bottom.</p>
 
-  <form id="quizForm">
+  <form id="quizForm" onsubmit="return false;">
     <div id="questions"></div>
 
     <div class="warn" id="warnBox"></div>
@@ -150,25 +160,33 @@
     <div class="submit-row">
       <button type="button" class="submit" id="submitBtn">Submit results</button>
     </div>
-    <p class="note">Submitting opens a new Gmail tab with a message to <strong>jaym@outerbox.com</strong> already filled in with your name, date, and answers. Review it and hit send to deliver your results.</p>
+    <p class="note">Your results are sent automatically to the OuterBox hiring team when you press Submit. No email account is needed.</p>
   </form>
 
-  <footer>OuterBox &mdash; Internal SEO training</footer>
+  <footer>OuterBox | Internal SEO training</footer>
 </div>
 
-<!-- Thank-you popover -->
+<!-- Result popover -->
 <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal">
     <button type="button" class="close" id="closeModal" aria-label="Close">&times;</button>
-    <div class="check">&#10003;</div>
+    <div class="check" id="modalIcon">&#10003;</div>
     <h2 id="modalTitle">Thank you, your answers have been submitted</h2>
-    <p>Your responses are now highlighted below &mdash; correct answers in green, incorrect in red.</p>
+    <p id="modalMsg">Your responses are now highlighted below. Correct answers are in green, incorrect in red.</p>
     <p class="score" id="scoreLine"></p>
     <button type="button" class="ok" id="okBtn">Review my answers</button>
+    <br>
+    <button type="button" class="alt" id="altBtn">Send by email instead</button>
   </div>
 </div>
 
 <script>
+  // ---- Settings ----
+  // Paste the Web app URL from your Apps Script deployment (ends in /exec).
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwOin2WIn-K7P6waD8XtYsA4mzSB9IZqC4gqhI-IuXnhROH4nrGPJ1XW3-kUFzznd7OvA/exec";
+  const RECIPIENT = "jaym@outerbox.com";
+  const QUIZ_TITLE = "SEO Base Optimizations Process Quiz";
+
   // ---- Quiz content: every answer is a full descriptive phrase; no column-letter answers ----
   // correct = index of the right option
   const QUIZ = [
@@ -244,7 +262,7 @@
       const id = "q" + n + "_o" + j;
       const safe = ans.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
       opts += '<li><label class="opt" for="' + id + '">' +
-                '<input type="radio" id="' + id + '" name="q' + n + '" data-idx="' + j + '" value="' + safe + '">' +
+                '<input type="radio" id="' + id + '" name="q' + n + '" data-idx="' + j + '">' +
                 '<span class="opt-text">' + safe + '</span>' +
               '</label></li>';
     });
@@ -258,7 +276,9 @@
   // ---- Helpers ----
   const overlay = document.getElementById("overlay");
   const submitBtn = document.getElementById("submitBtn");
+  const altBtn = document.getElementById("altBtn");
   let submitted = false;
+  let pendingResults = null;
 
   function addBadge(label, text) {
     const b = document.createElement("span");
@@ -267,13 +287,31 @@
     label.appendChild(b);
   }
 
-  function gradeAndHighlight() {
+  // Collect answers and score without changing the page
+  function collectResults(name, date) {
     let score = 0;
+    const answers = QUIZ.map((item, i) => {
+      const n = i + 1;
+      const sel = document.querySelector('input[name="q' + n + '"]:checked');
+      const idx = sel ? parseInt(sel.dataset.idx, 10) : -1;
+      const correct = idx === item.correct;
+      if (correct) score++;
+      return {
+        n: n,
+        q: item.q,
+        answer: idx >= 0 ? item.a[idx] : "(no answer)",
+        correct: correct,
+        correctAnswer: item.a[item.correct]
+      };
+    });
+    return { quiz: QUIZ_TITLE, name: name, date: date, score: score, total: QUIZ.length, answers: answers };
+  }
+
+  function highlightAnswers() {
     QUIZ.forEach((item, i) => {
       const n = i + 1;
       const sel = document.querySelector('input[name="q' + n + '"]:checked');
-      const radios = document.querySelectorAll('input[name="q' + n + '"]');
-      radios.forEach((r) => {
+      document.querySelectorAll('input[name="q' + n + '"]').forEach((r) => {
         const idx = parseInt(r.dataset.idx, 10);
         const label = r.closest(".opt");
         if (idx === item.correct) {
@@ -285,30 +323,93 @@
         }
         r.disabled = true;
       });
-      if (sel && parseInt(sel.dataset.idx, 10) === item.correct) score++;
     });
     document.getElementById("questions").classList.add("graded");
-    return score;
   }
 
-  function openModal(score) {
+  function buildEmail(results) {
+    const lines = results.answers.map((a) =>
+      "Q" + a.n + ". " + a.q +
+      "\n   Answer given: " + a.answer +
+      "\n   Result: " + (a.correct ? "Correct" : "Incorrect"));
+    const subject = QUIZ_TITLE + " Results - " + results.name + " - " + results.date +
+      " (" + results.score + "/" + results.total + ")";
+    const body =
+      QUIZ_TITLE + " - Results\n" +
+      "==============================\n\n" +
+      "Name: " + results.name + "\n" +
+      "Date: " + results.date + "\n" +
+      "Score: " + results.score + " of " + results.total + " correct\n\n" +
+      "ANSWERS\n-------\n" +
+      lines.join("\n\n") + "\n";
+    return { subject: subject, body: body };
+  }
+
+  function finishSubmission(results) {
+    submitted = true;
+    highlightAnswers();
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitted";
+  }
+
+  function showSuccess(results) {
+    document.getElementById("modalIcon").className = "check";
+    document.getElementById("modalIcon").innerHTML = "&#10003;";
+    document.getElementById("modalTitle").textContent = "Thank you, your answers have been submitted";
+    document.getElementById("modalMsg").textContent =
+      "Your responses are now highlighted below. Correct answers are in green, incorrect in red.";
     document.getElementById("scoreLine").textContent =
-      "Score: " + score + " out of " + QUIZ.length + " correct.";
+      "Score: " + results.score + " out of " + results.total + " correct.";
+    document.getElementById("okBtn").textContent = "Review my answers";
+    altBtn.classList.remove("show");
     overlay.classList.add("show");
     document.getElementById("okBtn").focus();
   }
+
+  function showFailure() {
+    document.getElementById("modalIcon").className = "check fail";
+    document.getElementById("modalIcon").textContent = "!";
+    document.getElementById("modalTitle").textContent = "Your results could not be sent";
+    document.getElementById("modalMsg").textContent =
+      "Please check your connection and press Submit again. If it keeps failing, use the email option below.";
+    document.getElementById("scoreLine").textContent = "";
+    document.getElementById("okBtn").textContent = "Close and try again";
+    altBtn.classList.add("show");
+    overlay.classList.add("show");
+    document.getElementById("okBtn").focus();
+  }
+
   function closeModal() {
     overlay.classList.remove("show");
-    document.getElementById("questions").scrollIntoView({ behavior: "smooth", block: "start" });
+    if (submitted) {
+      document.getElementById("questions").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   }
   document.getElementById("closeModal").addEventListener("click", closeModal);
   document.getElementById("okBtn").addEventListener("click", closeModal);
   overlay.addEventListener("click", function (e) { if (e.target === overlay) closeModal(); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && overlay.classList.contains("show")) closeModal(); });
 
+  // Backup route only: opens a pre-filled Gmail draft the candidate sends themselves
+  altBtn.addEventListener("click", function () {
+    if (!pendingResults) return;
+    const mail = buildEmail(pendingResults);
+    const gmailUrl = "https://mail.google.com/mail/?view=cm&fs=1&tf=1" +
+      "&to=" + encodeURIComponent(RECIPIENT) +
+      "&su=" + encodeURIComponent(mail.subject) +
+      "&body=" + encodeURIComponent(mail.body);
+    const win = window.open(gmailUrl, "_blank");
+    if (!win) {
+      window.location.href = "mailto:" + RECIPIENT + "?subject=" + encodeURIComponent(mail.subject) +
+        "&body=" + encodeURIComponent(mail.body);
+    }
+    finishSubmission(pendingResults);
+    showSuccess(pendingResults);
+  });
+
   // ---- Submit ----
-  submitBtn.addEventListener("click", function () {
-    if (submitted) return;
+  submitBtn.addEventListener("click", async function () {
+    if (submitted || submitBtn.disabled) return;
 
     const name = document.getElementById("name").value.trim();
     const date = document.getElementById("date").value.trim();
@@ -334,54 +435,37 @@
     }
     warnBox.style.display = "none";
 
-    // Build the email body before disabling inputs
-    const lines = [];
-    QUIZ.forEach((item, i) => {
-      const n = i + 1;
-      const sel = document.querySelector('input[name="q' + n + '"]:checked');
-      const answer = sel ? sel.value.replace(/&quot;/g, '"').replace(/&amp;/g, "&") : "(no answer)";
-      const isCorrect = sel && parseInt(sel.dataset.idx, 10) === item.correct;
-      lines.push("Q" + n + ". " + item.q +
-                 "\n   Answer given: " + answer +
-                 "\n   Result: " + (isCorrect ? "Correct" : "Incorrect"));
-    });
+    const results = collectResults(name, date);
+    pendingResults = results;
 
-    const score = gradeAndHighlight();
-
-    const subject = "SEO Base Optimizations Quiz Results - " + name + " - " + date + " (" + score + "/" + QUIZ.length + ")";
-    const body =
-      "SEO Base Optimizations Process Quiz - Results\n" +
-      "=============================================\n\n" +
-      "Name: " + name + "\n" +
-      "Date: " + date + "\n" +
-      "Score: " + score + " of " + QUIZ.length + " correct\n\n" +
-      "ANSWERS\n-------\n" +
-      lines.join("\n\n") + "\n";
-
-    // Open a pre-filled Gmail compose window in a new tab (users are logged into Chrome/Gmail).
-    // Opening in a new tab keeps the highlighting and popover visible on this page.
-    const gmailUrl = "https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1" +
-      "&to=jaym@outerbox.com" +
-      "&su=" + encodeURIComponent(subject) +
-      "&body=" + encodeURIComponent(body);
-    const win = window.open(gmailUrl, "_blank");
-
-    // Fallback: if the new tab was popup-blocked, open the default mail handler
-    // via a hidden link click (does not navigate this page away).
-    if (!win) {
-      const a = document.createElement("a");
-      a.href = "mailto:jaym@outerbox.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-      a.style.display = "none";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    }
-
-    submitted = true;
     submitBtn.disabled = true;
-    submitBtn.textContent = "Submitted";
+    submitBtn.textContent = "Sending...";
 
-    openModal(score);
+    try {
+      if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf("/exec") === -1) {
+        throw new Error("Results endpoint is not configured.");
+      }
+      const payload = Object.assign({}, results, {
+        website: document.getElementById("website").value,
+        submittedAt: new Date().toISOString()
+      });
+      // text/plain keeps this a "simple" request, so the browser skips the CORS preflight Apps Script can't answer
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+      const out = await res.json();
+      if (!out.ok) throw new Error(out.error || "Send failed");
+
+      finishSubmission(results);
+      showSuccess(results);
+    } catch (err) {
+      console.error("Quiz submission failed:", err);
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit results";
+      showFailure();
+    }
   });
 </script>
 
